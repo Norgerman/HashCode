@@ -3,6 +3,13 @@ SimpleHashClient
 
 #benchmark
 
+environment
+```
+cpu: I7-5600U
+RAM: 8G
+HardDisk: 512G PCI-E SSD
+```
+
 ```
 File: C:\Users\Norgerman\Downloads\Windows10.iso
 Size: 3275489280 Bytes
