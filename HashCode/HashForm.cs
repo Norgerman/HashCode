@@ -4,19 +4,22 @@ using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Text;
 
 namespace HashCode
 {
     public partial class HashForm : Form
     {
-        private const int buflen = 1048576;
+        private const int BUFFER_SIZE = 1048576;
         private DialogForm dialog;
         private delegate void Invokehandle();
         private string filename;
         private string MD5Value;
         private string SHA1Value;
         private string CRC32Value;
-        private string copytext;
+        private string timeString;
+        private StringBuilder copytext;
         private FileStream input;
         private SHA1CryptoServiceProvider osha1 = new SHA1CryptoServiceProvider();
         private MD5CryptoServiceProvider omd5 = new MD5CryptoServiceProvider();
@@ -25,6 +28,7 @@ namespace HashCode
         public HashForm()
         {
             InitializeComponent();
+            this.copytext = new StringBuilder();
             dialog = new DialogForm();
             dialog.Owner = this;
         }
@@ -46,21 +50,23 @@ namespace HashCode
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             string temp;
-            byte[] buffer = new byte[buflen];
+            byte[] buffer = new byte[BUFFER_SIZE];
             int len;
             long tlen;
             long clen = 0;
+            Stopwatch watch = new Stopwatch();
 
             input = new FileStream(filename, FileMode.Open, FileAccess.Read);
             tlen = input.Length;
 
-            copytext += string.Format("File: {0}\r\n", filename);
-            copytext += string.Format("Size: {0} Bytes\r\n", tlen);
-            copytext += string.Format("Modified: {0}\r\n", File.GetLastWriteTime(filename));
+            copytext.AppendFormat("File: {0}\r\n", filename);
+            copytext.AppendFormat("Size: {0} Bytes\r\n", tlen);
+            copytext.AppendFormat("Modified: {0}\r\n", File.GetLastWriteTime(filename));
 
+            watch.Start();
             try
             {
-                while ((len = input.Read(buffer, 0, buflen)) > 0)
+                while ((len = input.Read(buffer, 0, BUFFER_SIZE)) > 0)
                 {
                     if (!this.backgroundWorker.CancellationPending)
                     {
@@ -96,26 +102,25 @@ namespace HashCode
                     backgroundWorker.ReportProgress(100);
                 }
 
+                watch.Stop();
+                copytext.AppendFormat("Time used: {0} ms\r\n", watch.ElapsedMilliseconds);
+                timeString = $"{watch.ElapsedMilliseconds} ms";
+
                 temp = BitConverter.ToString(omd5.Hash);
                 temp = temp.Replace("-", "");
                 MD5Value = temp;
-                copytext += string.Format("MD5: {0}\r\n", MD5Value);
+                copytext.AppendFormat("MD5: {0}\r\n", MD5Value);
 
                 temp = BitConverter.ToString(osha1.Hash);
                 temp = temp.Replace("-", "");
                 SHA1Value = temp;
-                copytext += string.Format("SHA1: {0}\r\n", SHA1Value);
+                copytext.AppendFormat("SHA1: {0}\r\n", SHA1Value);
 
                 CRC32Value = string.Format("{0,8:X8}", ocrc32.Hash);
-                copytext += string.Format("CRC32: {0}\r\n", CRC32Value);
+                copytext.AppendFormat("CRC32: {0}\r\n", CRC32Value);
             }
             catch (Exception ex)
             {
-                /*this.Invoke((Invokehandle)delegate
-                {
-                    this.dialog.Show(ex.Message);
-                });*/
-
                 this.Invoke(new Invokehandle(() =>
                 {
                     this.dialog.Show(ex.Message);
@@ -123,6 +128,8 @@ namespace HashCode
             }
             finally
             {
+                if (watch.IsRunning)
+                    watch.Stop();
                 input.Close();
                 temp = null;
                 buffer = null;
@@ -132,11 +139,6 @@ namespace HashCode
 
         private void backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            /*this.progressBar.Invoke((Invokehandle)delegate
-            {
-                this.progressBar.Value = e.ProgressPercentage;
-            });*/
-
             this.progressBar.Invoke(new Invokehandle(() =>
             {
                 this.progressBar.Value = e.ProgressPercentage;
@@ -145,35 +147,6 @@ namespace HashCode
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            /*this.Invoke((Invokehandle)delegate
-            {
-                if(e.Cancelled)
-                {
-                    this.dialog.Show("Cancelled manually!");
-                }
-                else
-                {
-                    this.MD5.Text = MD5Value;
-                    this.Cmd5.Enabled = true;
-
-                    this.SHA1.Text = SHA1Value;
-                    this.Csha1.Enabled = true;
-
-                    this.CRC32.Text = CRC32Value;
-                    this.Ccrc32.Enabled = true;
-
-                    this.Copy.Enabled = true;
-                }
-
-                omd5.Initialize();
-                osha1.Initialize();
-                ocrc32.Initialize();
-
-                this.Start.Enabled = true;
-                this.Stop.Enabled = false;
-                this.Browser.Enabled = true;
-            });*/
-
             this.Invoke(new Invokehandle(() =>
             {
                 if (e.Cancelled)
@@ -192,6 +165,8 @@ namespace HashCode
                     this.Ccrc32.Enabled = true;
 
                     this.Copy.Enabled = true;
+
+                    this.tb_time.Text = timeString;
                 }
 
                 omd5.Initialize();
@@ -234,7 +209,10 @@ namespace HashCode
                 this.Csha1.Enabled = false;
                 this.Ccrc32.Enabled = false;
 
-                copytext = "";
+                this.timeString = "";
+                this.tb_time.Text = "";
+
+                copytext.Clear();
                 this.Copy.Enabled = false;
 
                 this.backgroundWorker.RunWorkerAsync();
@@ -294,7 +272,7 @@ namespace HashCode
 
         private void Copy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetDataObject(copytext, true);
+            Clipboard.SetDataObject(copytext.ToString(), true);
 
             this.dialog.Show("Copy to clipboard succeed!");
         }

@@ -59,12 +59,14 @@
             this.Rsha1 = new System.Windows.Forms.Label();
             this.Rcrc32 = new System.Windows.Forms.Label();
             this.Copy = new System.Windows.Forms.Button();
+            this.lb_time = new System.Windows.Forms.Label();
+            this.tb_time = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // MD5
             // 
             this.MD5.Location = new System.Drawing.Point(160, 25);
-            this.MD5.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.MD5.Margin = new System.Windows.Forms.Padding(6);
             this.MD5.Name = "MD5";
             this.MD5.ReadOnly = true;
             this.MD5.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -75,8 +77,8 @@
             // 
             // Path
             // 
-            this.Path.Location = new System.Drawing.Point(160, 440);
-            this.Path.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Path.Location = new System.Drawing.Point(160, 460);
+            this.Path.Margin = new System.Windows.Forms.Padding(6);
             this.Path.Name = "Path";
             this.Path.ReadOnly = true;
             this.Path.Size = new System.Drawing.Size(592, 31);
@@ -86,7 +88,7 @@
             // Lpath
             // 
             this.Lpath.AutoSize = true;
-            this.Lpath.Location = new System.Drawing.Point(64, 446);
+            this.Lpath.Location = new System.Drawing.Point(64, 466);
             this.Lpath.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.Lpath.Name = "Lpath";
             this.Lpath.Size = new System.Drawing.Size(56, 25);
@@ -96,8 +98,8 @@
             // Browser
             // 
             this.Browser.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Browser.Location = new System.Drawing.Point(768, 438);
-            this.Browser.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Browser.Location = new System.Drawing.Point(768, 458);
+            this.Browser.Margin = new System.Windows.Forms.Padding(6);
             this.Browser.Name = "Browser";
             this.Browser.Size = new System.Drawing.Size(78, 42);
             this.Browser.TabIndex = 0;
@@ -122,8 +124,8 @@
             // 
             // Start
             // 
-            this.Start.Location = new System.Drawing.Point(192, 569);
-            this.Start.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Start.Location = new System.Drawing.Point(192, 589);
+            this.Start.Margin = new System.Windows.Forms.Padding(6);
             this.Start.Name = "Start";
             this.Start.Size = new System.Drawing.Size(150, 44);
             this.Start.TabIndex = 7;
@@ -133,8 +135,8 @@
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(70, 510);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.progressBar.Location = new System.Drawing.Point(70, 530);
+            this.progressBar.Margin = new System.Windows.Forms.Padding(6);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(776, 27);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -143,8 +145,8 @@
             // Stop
             // 
             this.Stop.Enabled = false;
-            this.Stop.Location = new System.Drawing.Point(574, 569);
-            this.Stop.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Stop.Location = new System.Drawing.Point(574, 589);
+            this.Stop.Margin = new System.Windows.Forms.Padding(6);
             this.Stop.Name = "Stop";
             this.Stop.Size = new System.Drawing.Size(150, 44);
             this.Stop.TabIndex = 8;
@@ -185,7 +187,7 @@
             // SHA1
             // 
             this.SHA1.Location = new System.Drawing.Point(160, 162);
-            this.SHA1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.SHA1.Margin = new System.Windows.Forms.Padding(6);
             this.SHA1.Name = "SHA1";
             this.SHA1.ReadOnly = true;
             this.SHA1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -197,7 +199,7 @@
             // CRC32
             // 
             this.CRC32.Location = new System.Drawing.Point(158, 290);
-            this.CRC32.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.CRC32.Margin = new System.Windows.Forms.Padding(6);
             this.CRC32.Name = "CRC32";
             this.CRC32.ReadOnly = true;
             this.CRC32.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -209,7 +211,7 @@
             // Umd5
             // 
             this.Umd5.Location = new System.Drawing.Point(160, 75);
-            this.Umd5.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Umd5.Margin = new System.Windows.Forms.Padding(6);
             this.Umd5.Name = "Umd5";
             this.Umd5.Size = new System.Drawing.Size(590, 31);
             this.Umd5.TabIndex = 1;
@@ -217,7 +219,7 @@
             // Usha1
             // 
             this.Usha1.Location = new System.Drawing.Point(158, 212);
-            this.Usha1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Usha1.Margin = new System.Windows.Forms.Padding(6);
             this.Usha1.Name = "Usha1";
             this.Usha1.Size = new System.Drawing.Size(590, 31);
             this.Usha1.TabIndex = 3;
@@ -225,7 +227,7 @@
             // Ucrc32
             // 
             this.Ucrc32.Location = new System.Drawing.Point(158, 340);
-            this.Ucrc32.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Ucrc32.Margin = new System.Windows.Forms.Padding(6);
             this.Ucrc32.Name = "Ucrc32";
             this.Ucrc32.Size = new System.Drawing.Size(590, 31);
             this.Ucrc32.TabIndex = 5;
@@ -234,7 +236,7 @@
             // 
             this.Cmd5.Enabled = false;
             this.Cmd5.Location = new System.Drawing.Point(768, 25);
-            this.Cmd5.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Cmd5.Margin = new System.Windows.Forms.Padding(6);
             this.Cmd5.Name = "Cmd5";
             this.Cmd5.Size = new System.Drawing.Size(150, 44);
             this.Cmd5.TabIndex = 2;
@@ -246,7 +248,7 @@
             // 
             this.Csha1.Enabled = false;
             this.Csha1.Location = new System.Drawing.Point(768, 162);
-            this.Csha1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Csha1.Margin = new System.Windows.Forms.Padding(6);
             this.Csha1.Name = "Csha1";
             this.Csha1.Size = new System.Drawing.Size(150, 44);
             this.Csha1.TabIndex = 4;
@@ -258,7 +260,7 @@
             // 
             this.Ccrc32.Enabled = false;
             this.Ccrc32.Location = new System.Drawing.Point(766, 290);
-            this.Ccrc32.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Ccrc32.Margin = new System.Windows.Forms.Padding(6);
             this.Ccrc32.Name = "Ccrc32";
             this.Ccrc32.Size = new System.Drawing.Size(150, 44);
             this.Ccrc32.TabIndex = 6;
@@ -296,8 +298,8 @@
             // Copy
             // 
             this.Copy.Enabled = false;
-            this.Copy.Location = new System.Drawing.Point(386, 569);
-            this.Copy.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Copy.Location = new System.Drawing.Point(386, 589);
+            this.Copy.Margin = new System.Windows.Forms.Padding(6);
             this.Copy.Name = "Copy";
             this.Copy.Size = new System.Drawing.Size(150, 44);
             this.Copy.TabIndex = 11;
@@ -305,12 +307,31 @@
             this.Copy.UseVisualStyleBackColor = true;
             this.Copy.Click += new System.EventHandler(this.Copy_Click);
             // 
+            // lb_time
+            // 
+            this.lb_time.AutoSize = true;
+            this.lb_time.Location = new System.Drawing.Point(33, 404);
+            this.lb_time.Name = "lb_time";
+            this.lb_time.Size = new System.Drawing.Size(112, 25);
+            this.lb_time.TabIndex = 12;
+            this.lb_time.Text = "Time used";
+            // 
+            // tb_time
+            // 
+            this.tb_time.Location = new System.Drawing.Point(158, 404);
+            this.tb_time.Name = "tb_time";
+            this.tb_time.ReadOnly = true;
+            this.tb_time.Size = new System.Drawing.Size(590, 31);
+            this.tb_time.TabIndex = 13;
+            // 
             // HashForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(192F, 192F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(958, 637);
+            this.ClientSize = new System.Drawing.Size(958, 654);
+            this.Controls.Add(this.tb_time);
+            this.Controls.Add(this.lb_time);
             this.Controls.Add(this.Copy);
             this.Controls.Add(this.Rcrc32);
             this.Controls.Add(this.Rsha1);
@@ -335,7 +356,7 @@
             this.Controls.Add(this.MD5);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.MaximizeBox = false;
             this.Name = "HashForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -373,6 +394,8 @@
         private System.Windows.Forms.Label Rsha1;
         private System.Windows.Forms.Label Rcrc32;
         private System.Windows.Forms.Button Copy;
+        private System.Windows.Forms.Label lb_time;
+        private System.Windows.Forms.TextBox tb_time;
     }
 }
 
