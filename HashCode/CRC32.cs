@@ -7,7 +7,7 @@ namespace Norgerman.Hash
     {
         private const uint Polynomial = 0xEDB88320;
 
-        private uint[,] CRC32Table;
+        static private uint[,] CRC32Table;
 
         private uint hash;
 
@@ -19,10 +19,14 @@ namespace Norgerman.Hash
             }
         }
 
+        static CRC32()
+        {
+            InitCRC32Table();
+        }
+
         public CRC32()
         {
             Initialize();
-            InitCRC32Table();
         }
 
         public override void Initialize()
@@ -41,23 +45,28 @@ namespace Norgerman.Hash
                 i += 4;
                 uint two = BitConverter.ToUInt32(array, i);
                 i += 4;
-
-                crc = CRC32Table[7, one & 0xFF] ^
-                      CRC32Table[6, (one >> 8) & 0xFF] ^
-                      CRC32Table[5, (one >> 16) & 0xFF] ^
-                      CRC32Table[4, one >> 24] ^
-                      CRC32Table[3, two & 0xFF] ^
-                      CRC32Table[2, (two >> 8) & 0xFF] ^
-                      CRC32Table[1, (two >> 16) & 0xFF] ^
-                      CRC32Table[0, two >> 24];
+                unchecked
+                {
+                    crc = CRC32Table[7, one & 0xFF] ^
+                        CRC32Table[6, (one >> 8) & 0xFF] ^
+                        CRC32Table[5, (one >> 16) & 0xFF] ^
+                        CRC32Table[4, one >> 24] ^
+                        CRC32Table[3, two & 0xFF] ^
+                        CRC32Table[2, (two >> 8) & 0xFF] ^
+                        CRC32Table[1, (two >> 16) & 0xFF] ^
+                        CRC32Table[0, two >> 24];
+                }
 
                 len -= 8;
             }
 
             while (i < cbSize)
             {
-                crc = (crc >> 8) ^ CRC32Table[0, (crc & 0xFF) ^ array[i]];
-                i++;
+                unchecked
+                {
+                    crc = (crc >> 8) ^ CRC32Table[0, (crc & 0xFF) ^ array[i]];
+                    i++;
+                }
             }
 
             hash = ~crc;
@@ -74,8 +83,10 @@ namespace Norgerman.Hash
             };
         }
 
-        private void InitCRC32Table()
+        private static void InitCRC32Table()
         {
+            if (CRC32Table != null)
+                return;
             CRC32Table = new uint[8, 256];
             for (uint i = 0; i <= 0xFF; i++)
             {
