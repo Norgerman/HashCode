@@ -27,30 +27,55 @@ namespace Norgerman.Hash
             hash = 0x0;
         }
 
-        protected override void HashCore(byte[] array, int ibStart, int cbSize)
+        unsafe protected override void HashCore(byte[] array, int ibStart, int cbSize)
         {
             int len = cbSize;
             uint crc = ~hash;
             int i = ibStart;
-            while (len >= 8)
-            {
-                uint one = BitConverter.ToUInt32(array, i) ^ crc;
-                i += 4;
-                uint two = BitConverter.ToUInt32(array, i);
-                i += 4;
-                unchecked
-                {
-                    crc = CRC32Table[7, one & 0xFF] ^
-                        CRC32Table[6, (one >> 8) & 0xFF] ^
-                        CRC32Table[5, (one >> 16) & 0xFF] ^
-                        CRC32Table[4, one >> 24] ^
-                        CRC32Table[3, two & 0xFF] ^
-                        CRC32Table[2, (two >> 8) & 0xFF] ^
-                        CRC32Table[1, (two >> 16) & 0xFF] ^
-                        CRC32Table[0, two >> 24];
-                }
 
-                len -= 8;
+            fixed (byte* bptr = array)
+            {
+                byte* tempPtr = bptr;
+                tempPtr += i;
+                uint* current = (uint*)tempPtr;
+                while (len >= 8)
+                {
+                    if (BitConverter.IsLittleEndian)
+                    {
+                        uint one = *current++ ^ crc;
+                        uint two = *current++;
+                        unchecked
+                        {
+                            crc = CRC32Table[7, one & 0xFF] ^
+                                CRC32Table[6, (one >> 8) & 0xFF] ^
+                                CRC32Table[5, (one >> 16) & 0xFF] ^
+                                CRC32Table[4, one >> 24] ^
+                                CRC32Table[3, two & 0xFF] ^
+                                CRC32Table[2, (two >> 8) & 0xFF] ^
+                                CRC32Table[1, (two >> 16) & 0xFF] ^
+                                CRC32Table[0, two >> 24];
+                        }
+                    }
+                    else
+                    {
+                        uint one = *current++ ^ Swap(crc);
+                        uint two = *current++;
+                        unchecked
+                        {
+                            crc = CRC32Table[0, two & 0xFF] ^
+                               CRC32Table[1, (two >> 8) & 0xFF] ^
+                               CRC32Table[2, (two >> 16) & 0xFF] ^
+                               CRC32Table[3, (two >> 24) & 0xFF] ^
+                               CRC32Table[4, one & 0xFF] ^
+                               CRC32Table[5, (one >> 8) & 0xFF] ^
+                               CRC32Table[6, (one >> 16) & 0xFF] ^
+                               CRC32Table[7, (one >> 24) & 0xFF];
+                        }
+                    }
+
+                    len -= 8;
+                    i += 8;
+                }
             }
 
             while (i < cbSize)
@@ -72,6 +97,14 @@ namespace Norgerman.Hash
                 Array.Reverse(bytes);
 
             return bytes;
+        }
+
+        private static uint Swap(uint x)
+        {
+            return (x >> 24) |
+                ((x >> 8) & 0x0000FF00) |
+                ((x << 8) & 0x00FF0000) |
+                (x << 24);
         }
 
         private static void InitCRC32Table()
