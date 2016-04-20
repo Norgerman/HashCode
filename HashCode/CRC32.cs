@@ -11,14 +11,6 @@ namespace Norgerman.Hash
 
         private uint hash;
 
-        public override int HashSize
-        {
-            get
-            {
-                return 32;
-            }
-        }
-
         static CRC32()
         {
             InitCRC32Table();
@@ -26,6 +18,7 @@ namespace Norgerman.Hash
 
         public CRC32()
         {
+            HashSizeValue = 32;
             Initialize();
         }
 
