@@ -67,13 +67,11 @@ namespace Norgerman.Hash
 
         protected override byte[] HashFinal()
         {
-            return new byte[]
-            {
-                (byte)((hash >> 24) & 0xff),
-                (byte)((hash >> 16) & 0xff),
-                (byte)((hash >> 8) & 0xff),
-                (byte)(hash & 0xff)
-            };
+            var bytes = BitConverter.GetBytes(hash);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+
+            return bytes;
         }
 
         private static void InitCRC32Table()
