@@ -1,11 +1,11 @@
-﻿using CRC32;
+﻿using Norgerman.Hash;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
-using System.Windows.Forms;
-using System.Diagnostics;
 using System.Text;
+using System.Windows.Forms;
 
 namespace HashCode
 {
@@ -23,7 +23,7 @@ namespace HashCode
         private FileStream input;
         private SHA1CryptoServiceProvider osha1 = new SHA1CryptoServiceProvider();
         private MD5CryptoServiceProvider omd5 = new MD5CryptoServiceProvider();
-        private CRC32Provider ocrc32 = new CRC32Provider();
+        private CRC32 ocrc32 = new CRC32();
 
         public HashForm()
         {
@@ -74,7 +74,7 @@ namespace HashCode
                         {
                             omd5.TransformBlock(buffer, 0, len, buffer, 0);
                             osha1.TransformBlock(buffer, 0, len, buffer, 0);
-                            ocrc32.TransformBlock(buffer, 0, len);
+                            ocrc32.TransformBlock(buffer, 0, len, buffer, 0);
                         }
                         else
                         {
@@ -116,7 +116,9 @@ namespace HashCode
                 SHA1Value = temp;
                 copytext.AppendFormat("SHA1: {0}\r\n", SHA1Value);
 
-                CRC32Value = string.Format("{0,8:X8}", ocrc32.Hash);
+                temp = BitConverter.ToString(ocrc32.Hash);
+                temp = temp.Replace("-", "");
+                CRC32Value = temp;
                 copytext.AppendFormat("CRC32: {0}\r\n", CRC32Value);
             }
             catch (Exception ex)

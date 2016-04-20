@@ -1,49 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Security.Cryptography;
-using System.IO;
 
-namespace CRC32
+namespace Norgerman.Hash
 {
-    public class CRC32Provider
+    public class CRC32 : HashAlgorithm
     {
         private const uint Polynomial = 0xEDB88320;
 
         private uint[,] CRC32Table;
 
-        private bool complete;
-
         private uint hash;
 
-        public uint Hash
+        public override int HashSize
         {
             get
             {
-                if (complete)
-                    return hash;
-                else
-                    throw new CryptographicUnexpectedOperationException();
+                return 32;
             }
         }
 
-        public CRC32Provider()
+        public CRC32()
         {
             Initialize();
             InitCRC32Table();
         }
 
-        public void TransformBlock(byte[] inputBuffer, int offset, long count)
+        public override void Initialize()
         {
-            long len = count;
+            hash = 0x0;
+        }
+
+        protected override void HashCore(byte[] array, int ibStart, int cbSize)
+        {
+            int len = cbSize;
             uint crc = ~hash;
-            int i = offset;
+            int i = ibStart;
             while (len >= 8)
             {
-                uint one = BitConverter.ToUInt32(inputBuffer, i) ^ crc;
+                uint one = BitConverter.ToUInt32(array, i) ^ crc;
                 i += 4;
-                uint two = BitConverter.ToUInt32(inputBuffer, i);
+                uint two = BitConverter.ToUInt32(array, i);
                 i += 4;
 
                 crc = CRC32Table[7, one & 0xFF] ^
@@ -58,25 +54,24 @@ namespace CRC32
                 len -= 8;
             }
 
-            while (i < count)
+            while (i < cbSize)
             {
-                crc = (crc >> 8) ^ CRC32Table[0, (crc & 0xFF) ^ inputBuffer[i]];
+                crc = (crc >> 8) ^ CRC32Table[0, (crc & 0xFF) ^ array[i]];
                 i++;
             }
 
             hash = ~crc;
         }
 
-        public void TransformFinalBlock(byte[] inputBuffer, int offset, long count)
+        protected override byte[] HashFinal()
         {
-            TransformBlock(inputBuffer, offset, count);
-            complete = true;
-        }
-
-        public void Initialize()
-        {
-            hash = 0x0;
-            complete = false;
+            return new byte[]
+            {
+                (byte)((hash >> 24) & 0xff),
+                (byte)((hash >> 16) & 0xff),
+                (byte)((hash >> 8) & 0xff),
+                (byte)(hash & 0xff)
+            };
         }
 
         private void InitCRC32Table()
