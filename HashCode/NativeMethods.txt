@@ -5,3 +5,6 @@ ICON_SMALL
 ICON_BIG
 ICON_SMALL2
 IInitializeWithWindow
+CoCreateInstance
+IFileOpenDialog
+FileOpenDialog

@@ -3,12 +3,17 @@ using Microsoft.UI.Xaml.Controls;
 using Norgerman.Hash;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
-using Windows.Storage.Pickers;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.UI.Shell;
+using Windows.Win32.UI.Shell.Common;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -60,20 +65,53 @@ namespace HashCode
         }
 
 
-        private async void Open_Click(object _, RoutedEventArgs e)
+        private unsafe static string? PickFile(nint hWnd)
         {
-            var picker = new FileOpenPicker();
+            var hr = PInvoke.CoCreateInstance<IFileOpenDialog>(typeof(FileOpenDialog).GUID, null, CLSCTX.CLSCTX_INPROC_SERVER, out var fod);
+            if (!hr.Succeeded)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+            var types = new COMDLG_FILTERSPEC
+            {
+                pszSpec = (char*)Marshal.StringToHGlobalUni("*.*"),
+                pszName = (char*)Marshal.StringToHGlobalUni("All Files")
+            };
+            fod->SetFileTypes(1, &types);
+
+            try
+            {
+                IShellItem* ppsi;
+                fod->Show((HWND)hWnd);
+                fod->GetResult(&ppsi);
+                PWSTR filename;
+                ppsi->GetDisplayName(SIGDN.SIGDN_FILESYSPATH, &filename);
+                ppsi->Release();
+                return filename.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                fod->Release();
+                Marshal.FreeHGlobal((nint)types.pszSpec.Value);
+                Marshal.FreeHGlobal((nint)types.pszName.Value);
+            }
+        }
+
+        private void Open_Click(object _, RoutedEventArgs e)
+        {
             var window = ((Application.Current as App)?.Window as MainWindow);
             if (window != null)
             {
-                var hwnd = WindowNative.GetWindowHandle(window);
-                InitializeWithWindow.Initialize(picker, hwnd);
-            }
-            picker.FileTypeFilter.Add("*");
-            var file = await picker.PickSingleFileAsync();
-            if (file != null)
-            {
-                this._hashInfo.File = new FileInfo(file.Path);
+                var hWnd = WindowNative.GetWindowHandle(window);
+                var result = PickFile(hWnd);
+                if (result != null)
+                {
+                    this._hashInfo.File = new FileInfo(result);
+                }
             }
         }
 
@@ -114,7 +152,7 @@ namespace HashCode
                                 md5.Hash.CopyTo(new Span<byte>(this._resultBuffer, 0, 16));
                                 sha1.Hash.CopyTo(new Span<byte>(this._resultBuffer, 16, 20));
                                 crc32.Hash.CopyTo(new Span<byte>(this._resultBuffer, 36, 4));
-                               
+
                             }
                             this.DispatcherQueue.TryEnqueue(() =>
                             {
