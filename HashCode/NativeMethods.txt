@@ -6,5 +6,6 @@ ICON_BIG
 ICON_SMALL2
 IInitializeWithWindow
 CoCreateInstance
+CoTaskMemFree 
 IFileOpenDialog
 FileOpenDialog

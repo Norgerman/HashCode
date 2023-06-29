@@ -87,7 +87,9 @@ namespace HashCode
                 PWSTR filename;
                 ppsi->GetDisplayName(SIGDN.SIGDN_FILESYSPATH, &filename);
                 ppsi->Release();
-                return filename.ToString();
+                var result = filename.ToString();
+                PInvoke.CoTaskMemFree(filename.Value);
+                return result;
             }
             catch
             {
