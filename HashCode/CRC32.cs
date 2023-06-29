@@ -7,7 +7,7 @@ namespace Norgerman.Hash
     {
         private const uint Polynomial = 0xEDB88320;
 
-        static private uint[,] CRC32Table;
+        static private uint[,]? CRC32Table;
 
         private uint _hash;
 
@@ -46,7 +46,7 @@ namespace Norgerman.Hash
                         uint two = *current++;
                         unchecked
                         {
-                            crc = CRC32Table[7, one & 0xFF] ^
+                            crc = CRC32Table![7, one & 0xFF] ^
                                 CRC32Table[6, (one >> 8) & 0xFF] ^
                                 CRC32Table[5, (one >> 16) & 0xFF] ^
                                 CRC32Table[4, one >> 24] ^
@@ -62,7 +62,7 @@ namespace Norgerman.Hash
                         uint two = *current++;
                         unchecked
                         {
-                            crc = CRC32Table[0, two & 0xFF] ^
+                            crc = CRC32Table![0, two & 0xFF] ^
                                CRC32Table[1, (two >> 8) & 0xFF] ^
                                CRC32Table[2, (two >> 16) & 0xFF] ^
                                CRC32Table[3, (two >> 24) & 0xFF] ^
@@ -82,7 +82,7 @@ namespace Norgerman.Hash
             {
                 unchecked
                 {
-                    crc = (crc >> 8) ^ CRC32Table[0, (crc & 0xFF) ^ array[i]];
+                    crc = (crc >> 8) ^ CRC32Table![0, (crc & 0xFF) ^ array[i]];
                     i++;
                     len--;
                 }
