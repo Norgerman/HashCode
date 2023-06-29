@@ -127,7 +127,7 @@ namespace HashCode
         public void Finish(ReadOnlySpan<byte> md5, ReadOnlySpan<byte> sha1, ReadOnlySpan<byte> crc32, TimeSpan elapsed)
         {
             this.Status = HashStatus.Finished;
-            this.Message += $"MD5: {BytesToString(md5)}\nSHA1: {BytesToString(sha1)}\nCRC32: {BytesToString(crc32)}\nTime used: {elapsed.Milliseconds}ms";
+            this.Message += $"MD5: {BytesToString(md5)}\nSHA1: {BytesToString(sha1)}\nCRC32: {BytesToString(crc32)}\nTime used: {elapsed.TotalMilliseconds}ms";
         }
 
         public void Cancel()
