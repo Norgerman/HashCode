@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "HashCode (Package)": {
+      "commandName": "MsixPackage"
+    }
+  }
+}
