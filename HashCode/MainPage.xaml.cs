@@ -31,7 +31,7 @@ namespace HashCode
         private readonly FileHashInfo _hashInfo;
         private readonly Ticker _ticker;
         private CancellationTokenSource? _cancellationTokenSource;
-        private byte[] _resultBuffer;
+        private readonly byte[] _resultBuffer;
 
         public MainPage()
         {
