@@ -1,49 +1,38 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 
 namespace Norgerman.Hash
 {
-    public class CRC32 : HashAlgorithm
+    interface ICRC32
     {
-        private const uint Polynomial = 0xEDB88320;
+        uint Crc32(uint crc, Span<byte> data);
+    }
 
-        static private uint[,]? CRC32Table;
+    class CRC32Software : ICRC32
+    {
+        private uint[,]? CRC32Table;
 
-        private uint _hash;
-
-        static CRC32()
+        internal CRC32Software(uint polynomial)
         {
-            InitCRC32Table();
+            InitCRC32Table(polynomial);
         }
 
-        public CRC32()
+        public unsafe uint Crc32(uint crc, Span<byte> data)
         {
-            HashSizeValue = 32;
-            Initialize();
-        }
-
-        public override void Initialize()
-        {
-            _hash = 0x0;
-        }
-
-        unsafe protected override void HashCore(byte[] array, int ibStart, int cbSize)
-        {
-            int len = cbSize;
-            uint crc = ~_hash;
-            int i = ibStart;
-
-            fixed (byte* bptr = array)
+            crc = ~crc;
+            var len = data.Length;
+            var i = 0;
+            fixed (byte* bptr = data)
             {
-                byte* tempPtr = bptr;
-                tempPtr += i;
-                uint* current = (uint*)tempPtr;
+                var current = (uint*)bptr;
                 while (len >= 8)
                 {
                     if (BitConverter.IsLittleEndian)
                     {
-                        uint one = *current++ ^ crc;
-                        uint two = *current++;
+                        var one = *current++ ^ crc;
+                        var two = *current++;
                         unchecked
                         {
                             crc = CRC32Table![7, one & 0xFF] ^
@@ -58,8 +47,8 @@ namespace Norgerman.Hash
                     }
                     else
                     {
-                        uint one = *current++ ^ Swap(crc);
-                        uint two = *current++;
+                        var one = *current++ ^ Swap(crc);
+                        var two = *current++;
                         unchecked
                         {
                             crc = CRC32Table![0, two & 0xFF] ^
@@ -82,22 +71,12 @@ namespace Norgerman.Hash
             {
                 unchecked
                 {
-                    crc = (crc >> 8) ^ CRC32Table![0, (crc & 0xFF) ^ array[i]];
+                    crc = (crc >> 8) ^ CRC32Table![0, (crc & 0xFF) ^ data[i]];
                     i++;
                     len--;
                 }
             }
-
-            _hash = ~crc;
-        }
-
-        protected override byte[] HashFinal()
-        {
-            var bytes = BitConverter.GetBytes(_hash);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(bytes);
-
-            return bytes;
+            return ~crc;
         }
 
         private static uint Swap(uint x)
@@ -108,7 +87,7 @@ namespace Norgerman.Hash
                 (x << 24);
         }
 
-        private static void InitCRC32Table()
+        private void InitCRC32Table(uint polynomial)
         {
             if (CRC32Table != null)
                 return;
@@ -118,7 +97,7 @@ namespace Norgerman.Hash
                 uint crc = i;
                 for (uint j = 0; j < 8; j++)
                 {
-                    crc = (crc >> 1) ^ ((crc & 1) * Polynomial);
+                    crc = (crc >> 1) ^ ((crc & 1) * polynomial);
                 }
                 CRC32Table[0, i] = crc;
             }
@@ -133,6 +112,87 @@ namespace Norgerman.Hash
                 CRC32Table[6, i] = (CRC32Table[5, i] >> 8) ^ CRC32Table[0, CRC32Table[5, i] & 0xFF];
                 CRC32Table[7, i] = (CRC32Table[6, i] >> 8) ^ CRC32Table[0, CRC32Table[6, i] & 0xFF];
             }
+        }
+    }
+
+    class CRC32CSSE : ICRC32
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe uint Crc32(uint crc, Span<byte> data)
+        {
+            crc = ~crc;
+            var len = data.Length;
+            fixed (byte* bptr = data)
+            {
+                nint current = (nint)bptr;
+                if (current % 4 == 0)
+                {
+                    while (len >= 4)
+                    {
+                        crc = Sse42.Crc32(crc, *((uint*)(current)));
+                        current += 4;
+                        len -= 4;
+                    }
+                }
+                if (current % 2 == 0)
+                {
+                    while (len >= 2)
+                    {
+                        crc = Sse42.Crc32(crc, *((ushort*)(current)));
+                        current += 2;
+                        len -= 2;
+                    }
+                }
+                while (len > 0)
+                {
+                    crc = Sse42.Crc32(crc, *((byte*)(current)));
+                    current++;
+                    len--;
+                }
+            }
+
+            return ~crc;
+        }
+    }
+
+    public class CRC32 : HashAlgorithm
+    {
+        private uint _hash;
+        private ICRC32? _impl;
+        private readonly bool _useISCSI;
+        public CRC32(bool useISCSI)
+        {
+            HashSizeValue = 32;
+            _useISCSI = useISCSI;
+            Initialize();
+        }
+
+        public override void Initialize()
+        {
+            _hash = 0x0;
+
+            if (Sse42.IsSupported && this._useISCSI)
+            {
+                _impl = new CRC32CSSE();
+            }
+            else
+            {
+                _impl = new CRC32Software(this._useISCSI ? 0x82F63B78 : 0xEDB88320);
+            }
+        }
+
+        unsafe protected override void HashCore(byte[] array, int ibStart, int cbSize)
+        {
+            this._hash = _impl?.Crc32(this._hash, new Span<byte>(array, ibStart, cbSize)) ?? 0;
+        }
+
+        protected override byte[] HashFinal()
+        {
+            var bytes = BitConverter.GetBytes(_hash);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(bytes);
+
+            return bytes;
         }
     }
 }

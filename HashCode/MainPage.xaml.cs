@@ -38,7 +38,7 @@ namespace HashCode
             this._hashInfo = new FileHashInfo();
             this.InitializeComponent();
             this._ticker = new Ticker(new TimeSpan(10000));
-            this._resultBuffer = new byte[40];
+            this._resultBuffer = new byte[44];
         }
 
 
@@ -131,7 +131,8 @@ namespace HashCode
                 {
                     using var md5 = MD5.Create();
                     using var sha1 = SHA1.Create();
-                    using var crc32 = new CRC32();
+                    using var crc32 = new CRC32(false);
+                    using var crc32c = new CRC32(true);
                     using var stream = file.OpenRead();
                     var buffer = new byte[BUFFER_SIZE];
                     var readed = 0;
@@ -145,16 +146,18 @@ namespace HashCode
                                 md5.TransformBlock(buffer, 0, readed, buffer, 0);
                                 sha1.TransformBlock(buffer, 0, readed, buffer, 0);
                                 crc32.TransformBlock(buffer, 0, readed, buffer, 0);
+                                crc32c.TransformBlock(buffer, 0, readed, buffer, 0);
                             }
                             else
                             {
                                 md5.TransformFinalBlock(buffer, 0, readed);
                                 sha1.TransformFinalBlock(buffer, 0, readed);
                                 crc32.TransformFinalBlock(buffer, 0, readed);
+                                crc32c.TransformFinalBlock(buffer, 0, readed);
                                 md5.Hash.CopyTo(new Span<byte>(this._resultBuffer, 0, 16));
                                 sha1.Hash.CopyTo(new Span<byte>(this._resultBuffer, 16, 20));
                                 crc32.Hash.CopyTo(new Span<byte>(this._resultBuffer, 36, 4));
-
+                                crc32c.Hash.CopyTo(new Span<byte>(this._resultBuffer, 40, 4));
                             }
                             this.DispatcherQueue.TryEnqueue(() =>
                             {
@@ -197,7 +200,7 @@ namespace HashCode
         private void OnFinish()
         {
             this._ticker.Stop();
-            this._hashInfo.Finish(new Span<byte>(this._resultBuffer, 0, 16), new Span<byte>(this._resultBuffer, 16, 20), new Span<byte>(this._resultBuffer, 36, 4), this._ticker.Elapsed);
+            this._hashInfo.Finish(new Span<byte>(this._resultBuffer, 0, 16), new Span<byte>(this._resultBuffer, 16, 20), new Span<byte>(this._resultBuffer, 36, 4), new Span<byte>(this._resultBuffer, 40, 4), this._ticker.Elapsed);
         }
     }
 }

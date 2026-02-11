@@ -124,10 +124,10 @@ namespace HashCode
             this.Progress = (double)this._processed / this.File!.Length * 100.0;
         }
 
-        public void Finish(ReadOnlySpan<byte> md5, ReadOnlySpan<byte> sha1, ReadOnlySpan<byte> crc32, TimeSpan elapsed)
+        public void Finish(ReadOnlySpan<byte> md5, ReadOnlySpan<byte> sha1, ReadOnlySpan<byte> crc32, ReadOnlySpan<byte> crc32c, TimeSpan elapsed)
         {
             this.Status = HashStatus.Finished;
-            this.Message += $"MD5: {BytesToString(md5)}\nSHA1: {BytesToString(sha1)}\nCRC32: {BytesToString(crc32)}\nTime used: {elapsed.TotalMilliseconds}ms";
+            this.Message += $"MD5: {BytesToString(md5)}\nSHA1: {BytesToString(sha1)}\nCRC32: {BytesToString(crc32)}\nCRC32C: {BytesToString(crc32c)}\nTime used: {elapsed.TotalMilliseconds}ms";
         }
 
         public void Cancel()
